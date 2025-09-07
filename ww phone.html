@@ -1,0 +1,2402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WeatherWear - Умный гардероб</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            position: relative;
+            overflow-x: hidden;
+            animation: bodyFadeIn 1s ease-out;
+        }
+        
+        @keyframes bodyFadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Плавно переливающийся фон-оверлей за окном данных */
+        .bg-anim {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: linear-gradient(135deg, #2c3e50, #34495e, #3d566e, #2c3e50);
+            background-size: 400% 400%;
+            animation: gradientFlow 30s ease infinite;
+            filter: saturate(1.1) contrast(1.05);
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Анимированные фоны */
+        body.cold { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); animation: coldPulse 4s ease-in-out infinite; }
+        body.cold .bg-anim { background: linear-gradient(135deg, #4facfe, #00f2fe, #3ec5ff, #4facfe); }
+        body.cool { 
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            animation: coolFlow 6s ease-in-out infinite;
+        }
+        body.cool .bg-anim { background: linear-gradient(135deg, #a8edea, #fed6e3, #c9f1ee, #a8edea); }
+        body.mild { 
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            animation: mildGlow 5s ease-in-out infinite;
+        }
+        body.mild .bg-anim { background: linear-gradient(135deg, #ffecd2, #fcb69f, #ffd9b5, #ffecd2); }
+        body.warm { 
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            animation: warmWave 4s ease-in-out infinite;
+        }
+        body.warm .bg-anim { background: linear-gradient(135deg, #ff9a9e, #fecfef, #ffd1d6, #ff9a9e); }
+        body.hot { 
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            animation: hotPulse 3s ease-in-out infinite;
+        }
+        body.hot .bg-anim { background: linear-gradient(135deg, #ffd1a8, #ff9a9e, #ffc58f, #ffd1a8); }
+
+        /* Аниме/Манга стили */
+        body.manga-theme {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            animation: mangaPulse 4s ease-in-out infinite;
+        }
+        body.anime-theme {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1e1e1e 100%);
+            animation: animeGlow 3s ease-in-out infinite;
+        }
+        body.noir-theme {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            animation: noirShimmer 5s ease-in-out infinite;
+        }
+        body.sketch-theme {
+            background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+            animation: sketchFlow 4s ease-in-out infinite;
+        }
+        body.paper-theme {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+            animation: paperRustle 6s ease-in-out infinite;
+        }
+
+        @keyframes mangaPulse {
+            0%, 100% { background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); }
+            50% { background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%); }
+        }
+        @keyframes animeGlow {
+            0%, 100% { background: linear-gradient(135deg, #0f0f0f 0%, #1e1e1e 100%); }
+            50% { background: linear-gradient(135deg, #1e1e1e 0%, #0f0f0f 100%); }
+        }
+        @keyframes noirShimmer {
+            0%, 100% { background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%); }
+            50% { background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%); }
+        }
+        @keyframes sketchFlow {
+            0%, 100% { background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%); }
+            50% { background: linear-gradient(135deg, #e8e8e8 0%, #f8f8f8 100%); }
+        }
+        @keyframes paperRustle {
+            0%, 100% { background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%); }
+            50% { background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%); }
+        }
+
+        @keyframes coldPulse {
+            0%, 100% { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+            50% { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); }
+        }
+
+        @keyframes coolFlow {
+            0%, 100% { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+            50% { background: linear-gradient(135deg, #fed6e3 0%, #a8edea 100%); }
+        }
+
+        @keyframes mildGlow {
+            0%, 100% { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+            50% { background: linear-gradient(135deg, #fcb69f 0%, #ffecd2 100%); }
+        }
+
+        @keyframes warmWave {
+            0%, 100% { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+            50% { background: linear-gradient(135deg, #fecfef 0%, #ff9a9e 100%); }
+        }
+
+        @keyframes hotPulse {
+            0%, 100% { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+            50% { background: linear-gradient(135deg, #fcb69f 0%, #ffecd2 100%); }
+        }
+
+        .container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(25px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            max-width: 680px;
+            width: 100%;
+            text-align: center;
+            animation: slideIn 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmerContainer 3s infinite;
+        }
+        
+        @keyframes shimmerContainer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Топовые, но спокойные анимации элементов */
+        .container:hover { transform: translateY(-2px); transition: transform 0.3s ease; }
+        .get-recommendations, .geo-btn, .theme-toggle { 
+            position: relative; 
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .get-recommendations::after, .geo-btn::after, .theme-toggle::after {
+            content: '';
+            position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.25), transparent 40%);
+            opacity: 0; transition: opacity 0.25s ease;
+        }
+        .get-recommendations:hover::after, .geo-btn:hover::after, .theme-toggle:hover::after { opacity: 1; }
+        .get-recommendations:active, .geo-btn:active, .theme-toggle:active { 
+            transform: scale(0.98); 
+            transition: transform 0.1s ease;
+        }
+        .stat { 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .stat:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 10px 22px rgba(0,0,0,0.12); }
+        .stat:active { transform: scale(0.98); }
+
+        /* Тёмная тема */
+        body.dark {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        }
+        body.dark .container {
+            background: rgba(0, 0, 0, 0.8);
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+        }
+        body.dark h1 { color: #ffffff; }
+        body.dark .subtitle { color: #cccccc; }
+        body.dark .results { 
+            background: rgba(0, 0, 0, 0.9); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        body.dark .stat { 
+            background: rgba(20, 20, 20, 0.9); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        body.dark .temperature { color: #ffffff; }
+        body.dark .city-name { color: #cccccc; }
+        body.dark .weather-description { color: #ffffff; }
+        body.dark .city-input { 
+            background: rgba(0, 0, 0, 0.8); 
+            color: #ffffff; 
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        body.dark .city-input:focus { 
+            border-color: #ffffff; 
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+        }
+        body.dark .api-warning { 
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            color: #ffffff;
+        }
+        body.dark .recommendation { 
+            background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+        body.dark .section-title { color: #ffffff; }
+        body.dark .theme-toggle { 
+            background: rgba(255, 255, 255, 0.1); 
+            color: #ffffff; 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        body.dark .get-recommendations {
+            background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+            color: #000000;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+        body.dark .get-recommendations:hover {
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+        }
+        body.dark .geo-btn {
+            background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+            color: #000000;
+            box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);
+        }
+        body.dark .geo-btn:hover {
+            box-shadow: 0 8px 25px rgba(0, 255, 0, 0.4);
+        }
+
+        /* Переключатель темы */
+        .theme-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+            color: #2c3e50;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 999px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9rem;
+            min-height: 40px;
+        }
+        
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .theme-toggle:hover::before {
+            left: 100%;
+        }
+        .theme-toggle:hover { 
+            transform: translateY(-2px) scale(1.05); 
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.3);
+        }
+        .theme-toggle i { 
+            font-size: 1.1rem; 
+            transition: transform 0.3s ease;
+            transform: translateY(-2px);
+        }
+        .theme-toggle:hover i {
+            transform: translateY(-2px) rotate(15deg);
+        }
+        body.dark .theme-toggle { 
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%); 
+            color: #e6e9ef; 
+            border-color: rgba(255,255,255,0.1); 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1); 
+        }
+
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            background: linear-gradient(135deg, #2c3e50 0%, #667eea 50%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from { filter: drop-shadow(0 0 5px rgba(102, 126, 234, 0.3)); }
+            to { filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.6)); }
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            font-weight: 400;
+            opacity: 0.9;
+            animation: subtitleFade 1.5s ease-out 0.3s both;
+        }
+        
+        @keyframes subtitleFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 0.9; transform: translateY(0); }
+        }
+
+        .search-section {
+            margin-bottom: 30px;
+        }
+
+        .city-input {
+            width: 100%;
+            padding: 16px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            -webkit-appearance: none;
+            appearance: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .city-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .get-recommendations {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+            border: none;
+            padding: 16px 25px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4), 0 0 0 1px rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-height: 50px;
+        }
+        
+        .get-recommendations::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .get-recommendations:hover::before {
+            left: 100%;
+        }
+
+        .get-recommendations:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5), 0 0 0 1px rgba(255,255,255,0.2);
+        }
+
+        .get-recommendations:active {
+            transform: translateY(-1px);
+        }
+
+        .get-recommendations:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Кнопки действий */
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .geo-btn {
+            background: linear-gradient(135deg, #16a085 0%, #1abc9c 50%, #2ecc71 100%);
+            color: white;
+            border: none;
+            padding: 16px 25px;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            box-shadow: 0 8px 25px rgba(26, 188, 156, 0.4), 0 0 0 1px rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-height: 50px;
+        }
+        
+        .geo-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .geo-btn:hover::before {
+            left: 100%;
+        }
+
+        .geo-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(26, 188, 156, 0.5), 0 0 0 1px rgba(255,255,255,0.2);
+        }
+
+        .geo-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .geo-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            margin: 30px 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .spinner::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top: 4px solid #667eea;
+            border-right: 4px solid #764ba2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .spinner::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 34px;
+            height: 34px;
+            border: 3px solid transparent;
+            border-bottom: 3px solid #f093fb;
+            border-left: 3px solid #f39c12;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite reverse;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 35px;
+            padding: 35px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .results::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f39c12);
+            animation: progressBar 2s ease-in-out;
+        }
+        
+        @keyframes progressBar {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .weather-info {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 25px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .weather-details {
+            text-align: left;
+        }
+
+        .temperature {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .city-name {
+            font-size: 1.4rem;
+            color: #7f8c8d;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .weather-description {
+            color: #34495e;
+            font-size: 1.2rem;
+            text-transform: capitalize;
+            font-weight: 500;
+        }
+
+        .weather-icon {
+            font-size: 4rem;
+            color: #f39c12;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            animation: weatherFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes weatherFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .recommendation {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            animation: slideInUp 0.8s ease 0.2s both;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .recommendation h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recommendation p {
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        /* Подробные рекомендации */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 14px;
+        }
+        .detail-card {
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: left;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+        body.dark .detail-card { background: rgba(29, 33, 48, 0.9); border-color: rgba(255,255,255,0.06); }
+        .detail-card h5 { font-size: 1.05rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .detail-card ul { padding-left: 18px; line-height: 1.7; }
+        .detail-card li { margin-bottom: 4px; }
+
+        .recommendation h4 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .section-title {
+            margin: 15px 0 10px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #2c3e50;
+        }
+
+        .error {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            animation: shake 0.5s ease;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .weather-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.9) 100%);
+            padding: 18px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .stat:hover::before {
+            left: 100%;
+        }
+
+        .stat:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.3);
+        }
+        /* Появление результатов и карточек */
+        .results { animation: fadeInUp 0.6s ease; }
+        .detail-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .detail-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.12); }
+
+        /* Современный tooltip для графика */
+        #chartTooltip { 
+            position: fixed; 
+            z-index: 1000; 
+            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(20,20,20,0.95) 100%);
+            color: #fff; 
+            padding: 12px 16px; 
+            border-radius: 12px; 
+            font-size: 13px; 
+            pointer-events: none; 
+            transform: translate(-50%, -120%); 
+            opacity: 0; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+        
+        #chartTooltip::before {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(0,0,0,0.95);
+        }
+        
+        body.dark #chartTooltip {
+            background: linear-gradient(135deg, rgba(0,0,0,0.98) 0%, rgba(30,30,30,0.98) 100%);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1);
+        }
+        
+        body.dark #chartTooltip::before {
+            border-top-color: rgba(0,0,0,0.98);
+        }
+        
+        /* Стили для графика */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            min-height: 250px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 15px 0;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .chart-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+        
+        body.dark .chart-container {
+            background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        body.dark .chart-container:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+        
+        .chart-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-weight: 500;
+        }
+        
+        body.dark .chart-info {
+            color: #bbb;
+        }
+        
+        .chart-legend {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .legend-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-1px);
+        }
+        
+        body.dark .legend-item {
+            background: rgba(255,255,255,0.03);
+        }
+        
+        body.dark .legend-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 4px;
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .legend-color::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        #hourlyChart {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 300px;
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-container {
+                padding: 10px;
+                min-height: 200px;
+            }
+            
+            .chart-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .chart-legend {
+                gap: 10px;
+                font-size: 11px;
+            }
+            
+            #hourlyChart {
+                max-height: 200px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .chart-container {
+                padding: 8px;
+                min-height: 180px;
+            }
+            
+            .chart-legend {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            #hourlyChart {
+                max-height: 150px;
+            }
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .api-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .api-warning a {
+            color: white;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        /* Мобильные устройства - маленькие экраны */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                padding: 15px;
+                margin: 5px;
+                border-radius: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                margin-bottom: 8px;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+                margin-bottom: 20px;
+            }
+            
+            .weather-info {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .weather-details {
+                text-align: center;
+            }
+
+            .temperature {
+                font-size: 2.2rem;
+            }
+
+            .weather-icon {
+                font-size: 3.5rem;
+            }
+
+            .weather-stats {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .stat {
+                padding: 15px;
+            }
+            
+            .stat-value {
+                font-size: 1.3rem;
+            }
+            
+            .stat-label {
+                font-size: 0.9rem;
+            }
+            
+            .get-recommendations, .geo-btn {
+                padding: 14px 20px;
+                font-size: 1rem;
+                min-height: 48px;
+            }
+            
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                padding: 8px 12px;
+                font-size: 0.8rem;
+                min-height: 36px;
+            }
+            
+            .city-input {
+                padding: 14px 16px;
+                font-size: 0.95rem;
+            }
+            
+            .recommendation {
+                padding: 20px;
+            }
+            
+            .recommendation h3 {
+                font-size: 1.2rem;
+            }
+            
+            .recommendation p {
+                font-size: 1rem;
+            }
+        }
+
+        /* Планшеты и средние экраны */
+        @media (max-width: 768px) and (min-width: 481px) {
+            .container {
+                padding: 25px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+                margin-bottom: 30px;
+            }
+            
+            .weather-stats {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+            }
+            
+            .buttons {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+        
+        /* Очень маленькие экраны */
+        @media (max-width: 360px) {
+            .weather-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .temperature {
+                font-size: 2rem;
+            }
+            
+            .weather-icon {
+                font-size: 3rem;
+            }
+        }
+        
+        /* Ландшафтная ориентация на мобильных */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 5px;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 15px;
+            }
+            
+            .weather-info {
+                grid-template-columns: 1fr auto;
+                gap: 20px;
+            }
+            
+            .weather-stats {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+            }
+            
+            .stat {
+                padding: 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.1rem;
+            }
+            
+            .stat-label {
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* Дополнительные улучшения для мобильных */
+        @media (max-width: 768px) {
+            /* Улучшаем читаемость текста */
+            .city-name {
+                font-size: 1.2rem;
+            }
+            
+            .weather-description {
+                font-size: 1.1rem;
+            }
+            
+            /* Оптимизируем результаты */
+            .results {
+                padding: 20px;
+                margin-top: 20px;
+            }
+            
+            /* Улучшаем рекомендации */
+            .recommendation {
+                padding: 20px;
+                margin-bottom: 15px;
+            }
+            
+            .recommendation h3 {
+                font-size: 1.2rem;
+                margin-bottom: 12px;
+            }
+            
+            .recommendation p {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+            
+            /* Оптимизируем секции */
+            .section-title {
+                font-size: 1.2rem;
+                margin: 12px 0 8px;
+            }
+            
+            /* Улучшаем детали */
+            .detail-card {
+                padding: 14px;
+            }
+            
+            .detail-card h5 {
+                font-size: 1rem;
+                margin-bottom: 6px;
+            }
+            
+            .detail-card ul {
+                padding-left: 16px;
+                line-height: 1.6;
+            }
+            
+            .detail-card li {
+                margin-bottom: 3px;
+                font-size: 0.95rem;
+            }
+        }
+        
+        /* Улучшения для очень маленьких экранов */
+        @media (max-width: 320px) {
+            .container {
+                padding: 12px;
+                margin: 3px;
+            }
+            
+            h1 {
+                font-size: 1.4rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .city-input {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+            }
+            
+            .get-recommendations, .geo-btn {
+                padding: 12px 16px;
+                font-size: 0.95rem;
+                min-height: 44px;
+            }
+            
+            .theme-toggle {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+                min-height: 32px;
+            }
+            
+            .temperature {
+                font-size: 1.8rem;
+            }
+            
+            .weather-icon {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-anim"></div>
+    <div class="container" style="position:relative; z-index:1;">
+        <button id="themeToggle" class="theme-toggle" aria-label="Сменить тему"><i class="fas fa-moon"></i><span id="themeLabel">Тёмно</span></button>
+        <h1><i class="fas fa-cloud-sun"></i> WeatherWear</h1>
+        <p class="subtitle">Умный гардероб для любой погоды</p>
+        
+        <div id="apiWarning" class="api-warning" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            Для работы приложения необходим API ключ WeatherAPI.com. 
+            <a href="https://www.weatherapi.com/" target="_blank">Получить бесплатный ключ</a>
+        </div>
+        
+        <div class="search-section">
+            <input 
+                type="text" 
+                class="city-input" 
+                id="cityInput" 
+                placeholder="Введите название города..."
+                list="cities"
+                autocomplete="off"
+            >
+            <div id="recentWrapper" style="display:none; margin-bottom:12px; text-align:left;">
+                <div class="section-title" style="margin-top:0;"><i class="fas fa-clock"></i> Последние запросы</div>
+                <div id="recentSearches" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            </div>
+            <datalist id="cities">
+                <option value="Москва">
+                <option value="Санкт-Петербург">
+                <option value="Новосибирск">
+                <option value="Екатеринбург">
+                <option value="Казань">
+                <option value="Нижний Новгород">
+                <option value="Челябинск">
+                <option value="Самара">
+                <option value="Уфа">
+                <option value="Ростов-на-Дону">
+                <option value="Красноярск">
+                <option value="Пермь">
+                <option value="Воронеж">
+                <option value="Волгоград">
+                <option value="Краснодар">
+                <option value="Саратов">
+                <option value="Тюмень">
+                <option value="Тольятти">
+                <option value="Ижевск">
+                <option value="Барнаул">
+                <option value="Ульяновск">
+            </datalist>
+            
+            <div class="buttons">
+                <button class="get-recommendations" id="getRecommendations">
+                    <i class="fas fa-search"></i> Получить рекомендации
+                </button>
+                <button class="geo-btn" id="useGeolocation">
+                    <i class="fas fa-location-crosshairs"></i> Определить по геолокации
+                </button>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Получаем данные о погоде...</p>
+        </div>
+        
+        <div class="results" id="results">
+            <div class="weather-info">
+                <div class="weather-details">
+                    <div class="temperature" id="temperature"></div>
+                    <div class="city-name" id="cityName"></div>
+                    <div class="weather-description" id="weatherDescription"></div>
+                </div>
+                <div class="weather-icon" id="weatherIcon"></div>
+            </div>
+            <div id="chartSection" style="margin-top:10px; text-align:left;">
+                <div class="section-title"><i class="fas fa-chart-line"></i> Почасовой прогноз (24ч)</div>
+                <div class="chart-container">
+                    <div class="chart-info">
+                        <span id="chartRange">Следующие 24 часа</span>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #667eea;"></div>
+                                <span>Температура</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #f39c12;"></div>
+                                <span>Ощущается</span>
+                            </div>
+                        </div>
+                    </div>
+                    <canvas id="hourlyChart"></canvas>
+                    <div id="chartTooltip"></div>
+                </div>
+            </div>
+            
+            <div class="weather-stats">
+                <div class="stat">
+                    <div class="stat-value" id="feelsLike"></div>
+                    <div class="stat-label">Ощущается как</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="windSpeed"></div>
+                    <div class="stat-label">Ветер (м/с)</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="humidity"></div>
+                    <div class="stat-label">Влажность (%)</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="pressure"></div>
+                    <div class="stat-label">Давление (мм)</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="uvIndex"></div>
+                    <div class="stat-label">УФ-индекс</div>
+                </div>
+            </div>
+            
+            <div id="recommendations">
+                <h3 class="section-title"><i class="fas fa-tshirt"></i> Что одеть</h3>
+                <div class="recommendation">
+                    <p id="clothingRecommendation"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Используем forecast.json для текущей погоды и почасового прогноза
+        const API_BASE_URL = 'https://api.weatherapi.com/v1/forecast.json';
+        const API_KEY = '837c5b79fc564c3fb14100703251108'; // Получите бесплатный ключ на https://www.weatherapi.com/
+        
+        const cityInput = document.getElementById('cityInput');
+        const getRecommendationsBtn = document.getElementById('getRecommendations');
+        const useGeolocationBtn = document.getElementById('useGeolocation');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const apiWarning = document.getElementById('apiWarning');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeLabel = document.getElementById('themeLabel');
+        const recentWrapper = document.getElementById('recentWrapper');
+        const recentContainer = document.getElementById('recentSearches');
+
+        // Состояние единиц измерения температуры
+        let lastWeatherData = null; // кеш последнего ответа
+        let units = 'C'; // единицы измерения температуры
+        
+        // Показываем предупреждение об API, если ключ не установлен
+        if (API_KEY === 'YOUR_API_KEY_HERE') {
+            apiWarning.style.display = 'block';
+            apiWarning.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                Для работы приложения необходим API ключ WeatherAPI.com. 
+                <a href="https://www.weatherapi.com/" target="_blank">Получить бесплатный ключ</a>
+            `;
+        }
+        
+        // Тема: инициализация
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if ((savedTheme === 'dark') || (!savedTheme && prefersDark)) {
+            document.body.classList.add('dark');
+        }
+        updateThemeToggleLabel();
+        renderRecentSearches();
+
+        themeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+            updateThemeToggleLabel();
+        });
+
+        function updateThemeToggleLabel() {
+            const isDark = document.body.classList.contains('dark');
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i><span>Светло</span>' : '<i class="fas fa-moon"></i><span>Тёмно</span>';
+        }
+
+        // Функции для работы с единицами измерения
+        function toF(celsius) {
+            return Math.round(celsius * 9/5 + 32);
+        }
+        
+        function unitLabel() {
+            return units === 'C' ? '°C' : '°F';
+        }
+
+        // Загрузка последнего города из localStorage
+        const lastCity = localStorage.getItem('lastCity');
+        if (lastCity) {
+            cityInput.value = lastCity;
+        }
+        
+        // Обработчик клика по кнопке
+        getRecommendationsBtn.addEventListener('click', getWeatherRecommendations);
+        
+        // Обработчик Enter в поле ввода
+        cityInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                getWeatherRecommendations();
+            }
+        });
+
+        // Обработчик изменения в поле ввода
+        cityInput.addEventListener('input', function() {
+            if (this.value.trim()) {
+                getRecommendationsBtn.disabled = false;
+            } else {
+                getRecommendationsBtn.disabled = true;
+            }
+        });
+        
+        async function getWeatherRecommendations() {
+            const city = cityInput.value.trim();
+            if (!city) {
+                showError('Пожалуйста, введите название города');
+                return;
+            }
+            await fetchWeather(city, { persistCity: true });
+        }
+
+        async function fetchWeather(query, options = { persistCity: false }) {
+            // Если ключа нет, отображаем предупреждение (обрабатывается выше для 'YOUR_API_KEY_HERE')
+            showLoading(true);
+            try {
+                const url = `${API_BASE_URL}?key=${API_KEY}&q=${encodeURIComponent(query)}&days=2&aqi=no&alerts=no&lang=ru`;
+                const response = await fetch(url);
+                if (!response.ok) {
+                    if (response.status === 400) {
+                        throw new Error('Локация не найдена. Уточните запрос');
+                    } else if (response.status === 401) {
+                        throw new Error('Неверный API ключ. Проверьте настройки');
+                    } else {
+                        throw new Error('Ошибка получения данных о погоде');
+                    }
+                }
+                const data = await response.json();
+                if (options.persistCity && typeof query === 'string' && isNaN(Number(query))) {
+                    localStorage.setItem('lastCity', query);
+                }
+                lastWeatherData = data;
+                displayWeatherData(data);
+                generateRecommendations(data);
+                pushRecentSearch(data);
+            } catch (error) {
+                showError('Ошибка: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Геолокация для повышения точности (используем координаты)
+        useGeolocationBtn.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                showError('Геолокация не поддерживается вашим браузером');
+                return;
+            }
+            showLoading(true);
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const latitude = position.coords.latitude.toFixed(5);
+                    const longitude = position.coords.longitude.toFixed(5);
+                    await fetchWeather(`${latitude},${longitude}`);
+                },
+                (err) => {
+                    showError('Не удалось получить геопозицию: ' + err.message);
+                    showLoading(false);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+            );
+        });
+        
+        function displayWeatherData(data, opts = { reuse: false }) {
+            const temp = Math.round(data.current.temp_c);
+            const feelsLike = Math.round(data.current.feelslike_c);
+            const windSpeed = Math.round(data.current.wind_kph / 3.6 * 10) / 10; // конвертация км/ч в м/с
+            const humidity = data.current.humidity;
+            const pressure = Math.round(data.current.pressure_mb * 0.750062); // конвертация мбар в мм рт.ст.
+            const uv = typeof data.current.uv === 'number' ? data.current.uv : '';
+            const description = data.current.condition.text;
+            const locationName = [data.location.name, data.location.region, data.location.country]
+                .filter(Boolean)
+                .join(', ');
+            
+            document.getElementById('temperature').textContent = `${temp}°C`;
+            document.getElementById('feelsLike').textContent = `${feelsLike}°C`;
+            document.getElementById('windSpeed').textContent = `${windSpeed}`;
+            document.getElementById('humidity').textContent = `${humidity}`;
+            document.getElementById('pressure').textContent = `${pressure}`;
+            const uvEl = document.getElementById('uvIndex');
+            if (uvEl) {
+                uvEl.textContent = `${uv}`;
+            }
+            document.getElementById('weatherDescription').textContent = description;
+            document.getElementById('cityName').textContent = locationName;
+            
+            // Устанавливаем иконку погоды
+            const weatherIcon = document.getElementById('weatherIcon');
+            const weatherCode = data.current.condition.code;
+            
+            // Маппинг кодов погоды на иконки
+            const weatherIcons = {
+                1000: '<i class="fas fa-sun"></i>', // Ясно
+                1003: '<i class="fas fa-cloud-sun"></i>', // Переменная облачность
+                1006: '<i class="fas fa-cloud"></i>', // Облачно
+                1009: '<i class="fas fa-cloud"></i>', // Пасмурно
+                1030: '<i class="fas fa-smog"></i>', // Туман
+                1063: '<i class="fas fa-cloud-rain"></i>', // Небольшой дождь
+                1066: '<i class="fas fa-snowflake"></i>', // Небольшой снег
+                1069: '<i class="fas fa-cloud-rain"></i>', // Мокрый снег
+                1087: '<i class="fas fa-bolt"></i>', // Гроза
+                1114: '<i class="fas fa-snowflake"></i>', // Снег
+                1117: '<i class="fas fa-snowflake"></i>', // Снежная буря
+                1135: '<i class="fas fa-smog"></i>', // Туман
+                1147: '<i class="fas fa-smog"></i>', // Ледяной туман
+                1150: '<i class="fas fa-cloud-rain"></i>', // Морось
+                1153: '<i class="fas fa-cloud-rain"></i>', // Легкая морось
+                1168: '<i class="fas fa-cloud-rain"></i>', // Ледяная морось
+                1171: '<i class="fas fa-cloud-rain"></i>', // Сильная ледяная морось
+                1180: '<i class="fas fa-cloud-rain"></i>', // Небольшой дождь
+                1183: '<i class="fas fa-cloud-rain"></i>', // Легкий дождь
+                1186: '<i class="fas fa-cloud-rain"></i>', // Умеренный дождь
+                1189: '<i class="fas fa-cloud-rain"></i>', // Сильный дождь
+                1192: '<i class="fas fa-cloud-showers-heavy"></i>', // Очень сильный дождь
+                1195: '<i class="fas fa-cloud-showers-heavy"></i>', // Экстремальный дождь
+                1198: '<i class="fas fa-cloud-rain"></i>', // Ледяной дождь
+                1201: '<i class="fas fa-cloud-rain"></i>', // Сильный ледяной дождь
+                1204: '<i class="fas fa-cloud-rain"></i>', // Мокрый снег
+                1207: '<i class="fas fa-cloud-rain"></i>', // Сильный мокрый снег
+                1210: '<i class="fas fa-snowflake"></i>', // Небольшой снег
+                1213: '<i class="fas fa-snowflake"></i>', // Легкий снег
+                1216: '<i class="fas fa-snowflake"></i>', // Умеренный снег
+                1219: '<i class="fas fa-snowflake"></i>', // Сильный снег
+                1222: '<i class="fas fa-snowflake"></i>', // Очень сильный снег
+                1225: '<i class="fas fa-snowflake"></i>', // Экстремальный снег
+                1237: '<i class="fas fa-snowflake"></i>', // Ледяной дождь
+                1240: '<i class="fas fa-cloud-rain"></i>', // Легкий дождь
+                1243: '<i class="fas fa-cloud-rain"></i>', // Умеренный дождь
+                1246: '<i class="fas fa-cloud-showers-heavy"></i>', // Сильный дождь
+                1249: '<i class="fas fa-cloud-rain"></i>', // Легкий мокрый снег
+                1252: '<i class="fas fa-cloud-rain"></i>', // Сильный мокрый снег
+                1255: '<i class="fas fa-snowflake"></i>', // Легкий снег
+                1258: '<i class="fas fa-snowflake"></i>', // Сильный снег
+                1261: '<i class="fas fa-snowflake"></i>', // Ледяной дождь
+                1264: '<i class="fas fa-snowflake"></i>', // Сильный ледяной дождь
+                1273: '<i class="fas fa-bolt"></i>', // Гроза с дождем
+                1276: '<i class="fas fa-bolt"></i>' // Гроза со снегом
+            };
+            
+            if (!opts.reuse) {
+                weatherIcon.innerHTML = weatherIcons[weatherCode] || '<i class="fas fa-cloud"></i>';
+            }
+            
+            // Меняем фон в зависимости от температуры
+            changeBackground(Math.round(data.current.temp_c));
+
+            // Рендерим график только если есть данные
+            if (data.forecast && data.forecast.forecastday) {
+            renderHourlyChart(data);
+            }
+            
+            results.style.display = 'block';
+        }
+        
+        function generateRecommendations(data) {
+            const temp = data.current.temp_c; // логика на °C
+            const windSpeed = data.current.wind_kph / 3.6; // м/с
+            const humidity = data.current.humidity;
+            const weatherDescription = data.current.condition.text.toLowerCase();
+            const uv = typeof data.current.uv === 'number' ? data.current.uv : 0;
+
+            const isRain = /(дожд|rain|ливн)/.test(weatherDescription);
+            const isSnow = /(снег|snow)/.test(weatherDescription);
+            const isFog  = /(туман|fog)/.test(weatherDescription);
+
+            // Ощущаемая температура: учитываем ветер и влажность (упрощенно)
+            let effectiveTemp = temp;
+            if (temp <= 10 && windSpeed > 1.3) {
+                const vKmh = windSpeed * 3.6;
+                const wc = 13.12 + 0.6215 * temp - 11.37 * Math.pow(vKmh, 0.16) + 0.3965 * temp * Math.pow(vKmh, 0.16);
+                effectiveTemp = Math.round(wc);
+            } else if (temp >= 24 && humidity >= 60) {
+                effectiveTemp = temp + (humidity >= 70 ? 2 : 1); // ощущается жарче при высокой влажности
+            }
+
+            function uniq(items) {
+                return [...new Set(items.filter(Boolean))];
+            }
+
+            // Детерминированный рандом, чтобы 10/30/60 отличались и были стабильными
+            function mulberry32(seed) {
+                let t = seed >>> 0;
+                return function() {
+                    t += 0x6D2B79F5;
+                    let r = Math.imul(t ^ t >>> 15, 1 | t);
+                    r ^= r + Math.imul(r ^ r >>> 7, 61 | r);
+                    return ((r ^ r >>> 14) >>> 0) / 4294967296;
+                };
+            }
+            function strHash(s) {
+                let h = 2166136261;
+                for (let i = 0; i < s.length; i++) {
+                    h ^= s.charCodeAt(i);
+                    h = Math.imul(h, 16777619);
+                }
+                return h >>> 0;
+            }
+            function makeRng(minutes) {
+                const seedStr = `${Math.round(effectiveTemp)}|${Math.round(windSpeed*10)}|${humidity}|${uv}|${isRain?'R':''}${isSnow?'S': ''}${isFog?'F':''}|${minutes}`;
+                return mulberry32(strHash(seedStr));
+            }
+            function pickN(rng, arr, n) {
+                const copy = [...arr];
+                const out = [];
+                while (copy.length && out.length < n) {
+                    const idx = Math.floor(rng() * copy.length);
+                    out.push(copy.splice(idx, 1)[0]);
+                }
+                return out;
+            }
+
+            function poolsForTemp(t) {
+                if (t < -15) return {
+                    base: ['тёплое нижнее бельё', 'толстые носки'],
+                    mid: ['толстый свитер', 'тёплая кофта', 'жилет с утеплителем'],
+                    outer: ['очень тёплая куртка', 'зимняя парка', 'шарф, капюшон'],
+                    pants: ['тёплые штаны', 'два слоя штанов'],
+                };
+                if (t < -5) return {
+                    base: ['тёплое бельё', 'длинная футболка', 'тёплые носки'],
+                    mid: ['толстый свитер', 'тёплая кофта', 'жилет'],
+                    outer: ['зимняя куртка', 'тёплая куртка от ветра'],
+                    pants: ['тёплые штаны', 'джинсы с тёплым бельём'],
+                };
+                if (t < 5) return {
+                    base: ['длинная футболка', 'футболка с тёплым бельём'],
+                    mid: ['свитер', 'тёплая кофта'],
+                    outer: ['тёплая куртка', 'куртка от ветра'],
+                    pants: ['джинсы', 'плотные штаны'],
+                };
+                if (t < 12) return {
+                    base: ['футболка', 'длинная футболка'],
+                    mid: ['свитер', 'кофта'],
+                    outer: ['лёгкая куртка', 'ветровка'],
+                    pants: ['джинсы', 'обычные штаны'],
+                };
+                if (t < 18) return {
+                    base: ['футболка', 'тонкая длинная футболка'],
+                    mid: ['лёгкий свитер', 'кофта'],
+                    outer: ['лёгкая куртка', 'рубашка сверху'],
+                    pants: ['лёгкие штаны', 'джинсы'],
+                };
+                if (t < 24) return {
+                    base: ['футболка', 'поло', 'тонкая рубашка'],
+                    mid: ['лёгкий свитер (можно не надевать)'],
+                    outer: ['без куртки', 'лёгкая накидка'],
+                    pants: ['лёгкие штаны', 'обычные штаны'],
+                };
+                return {
+                    base: ['лёгкая футболка', 'майка'],
+                    mid: ['без дополнительного слоя'],
+                    outer: ['без куртки', 'очень лёгкая куртка от солнца'],
+                    pants: ['шорты', 'лёгкие штаны'],
+                };
+            }
+
+            function weatherExtras() {
+                const extras = [];
+                if (isRain) extras.push('непромокаемая обувь', 'зонт или дождевик', 'куртка от дождя', 'защита для документов');
+                if (isSnow) extras.push('непромокаемая обувь', 'накладки на обувь от скольжения', 'тёплая стелька');
+                if (isFog) extras.push('яркая одежда или светоотражатели');
+                if (humidity > 85 && temp > 0) extras.push('дышащая одежда', 'запасная футболка');
+                if (uv >= 6 && temp > 15) extras.push('крем от солнца', 'головной убор');
+                else if (uv >= 3 && temp > 15) extras.push('лёгкий крем от солнца', 'головной убор');
+                return extras;
+            }
+
+            function makeSelection(minutes) {
+                const rng = makeRng(minutes);
+                const pools = poolsForTemp(effectiveTemp);
+
+                // Различаем объём слоёв по длительности
+                const baseCount = minutes < 20 ? 1 : (minutes < 50 ? 2 : Math.min(2, pools.base.length));
+                const midCount = minutes < 20 ? 1 : (minutes < 50 ? Math.min(2, pools.mid.length) : Math.min(2, pools.mid.length));
+                const outerCount = 1; // всегда выбираем верхний слой, но он может стать «без слоя»
+                const pantsCount = 1;
+
+                const base = pickN(rng, pools.base, baseCount);
+                const mid = pickN(rng, pools.mid, midCount);
+                const outer = pickN(rng, pools.outer, outerCount);
+                const pants = pickN(rng, pools.pants, pantsCount);
+
+                const acc = [];
+                if (effectiveTemp < 5) acc.push('шапка или шарф');
+                if (effectiveTemp < -5) acc.push('варежки или перчатки');
+                if (uv >= 3 && effectiveTemp > 15) acc.push('солнечные очки');
+                if (isRain || isSnow) acc.push('зонт или капюшон');
+                if (windSpeed > 6) acc.push('защита шеи от ветра');
+                const extra = weatherExtras();
+
+                const shoes = [];
+                if (isSnow || effectiveTemp < 0) shoes.push('тёплая непромокаемая обувь');
+                if (isRain && effectiveTemp > 0) shoes.push('непромокаемая обувь');
+                if (!shoes.length) shoes.push(effectiveTemp > 22 ? 'лёгкая обувь' : 'обычная обувь');
+
+                // Дополнительные рекомендации по времени
+                if (minutes >= 30) {
+                    if (effectiveTemp < 10) mid.push('дополнительная тёплая кофта');
+                    if (windSpeed > 5) outer.push('защита от ветра');
+                    if (temp >= 25) acc.push('вода');
+                }
+                if (minutes >= 60) {
+                    if (effectiveTemp < 0) base.push('тёплые носки');
+                    if (isRain || isSnow) outer.push('дождевик или капюшон');
+                    if (temp >= 28) acc.push('кепка, больше воды');
+                }
+
+                // Рекомендации по длительности
+                if (minutes < 20) {
+                    acc.push('минимум одежды');
+                    if (isRain) acc.push('маленький зонт');
+                } else if (minutes < 50) {
+                    acc.push('удобная одежда на 30 минут');
+                    if (windSpeed > 4) outer.push('лёгкая защита от ветра');
+                } else {
+                    acc.push('запасная кофта на час');
+                    if (effectiveTemp <= 12) mid.push('дополнительная тёплая кофта');
+                }
+
+                const fabrics = [];
+                if (effectiveTemp < 10) fabrics.push('тёплые ткани: шерсть, флис');
+                if (effectiveTemp >= 10 && effectiveTemp <= 22) fabrics.push('обычные ткани: хлопок, смеси');
+                if (effectiveTemp > 22) fabrics.push('лёгкие ткани: лён, тонкий хлопок');
+                if (humidity > 85) fabrics.push('избегайте чистого хлопка при активности');
+
+                const notes = [];
+                if (windSpeed > 8) notes.push('очень ветрено — наденьте что-то от ветра');
+                if (temp >= 28) notes.push('жарко — пейте воду, не перегревайтесь');
+                if (pressure < 740) notes.push('низкое давление — может быть некомфортно');
+
+                return {
+                    base: uniq(base), mid: uniq(mid), outer: uniq(outer), pants: uniq(pants),
+                    accessories: uniq([...acc, ...extra]), shoes: uniq(shoes), fabrics: uniq(fabrics), notes: uniq(notes)
+                };
+            }
+
+            function buildText(minutes) {
+                const sel = makeSelection(minutes);
+                // Приоритет: верхний -> средний -> базовый -> брюки -> обувь -> ключевой аксессуар
+                const essentials = [];
+                if (sel.outer[0]) essentials.push(sel.outer[0]);
+                if (sel.mid[0]) essentials.push(sel.mid[0]);
+                if (sel.base[0]) essentials.push(sel.base[0]);
+                if (sel.pants[0]) essentials.push(sel.pants[0]);
+                if (sel.shoes[0]) essentials.push(sel.shoes[0]);
+                // Один ключевой аксессуар по погоде
+                const keyAcc = (isRain || isSnow) ? 'зонт/капюшон' : (uv >= 5 && effectiveTemp > 16 ? 'головной убор' : (windSpeed > 6 ? 'ветрозащита' : ''));
+                if (keyAcc) essentials.push(keyAcc);
+                const shortSet = uniq(essentials).slice(0, 4);
+                const eff = units === 'C' ? effectiveTemp : toF(effectiveTemp);
+                return `${shortSet.join(', ')} • ~${eff}${unitLabel()}`;
+            }
+
+
+            // Создаем общие рекомендации
+            const selectionForDetails = makeSelection(30);
+            
+            // Объединяем все рекомендации в один список
+            const allRecommendations = [
+                ...selectionForDetails.base,
+                ...selectionForDetails.mid,
+                ...selectionForDetails.outer,
+                ...selectionForDetails.pants,
+                ...selectionForDetails.shoes
+            ];
+            
+            // Добавляем важные аксессуары и примечания
+            const importantExtras = selectionForDetails.accessories.filter(item => 
+                item.includes('зонт') || item.includes('шапка') || item.includes('перчатки') || 
+                item.includes('очки') || item.includes('головной убор')
+            );
+            
+            const importantNotes = selectionForDetails.notes.filter(item => 
+                item.includes('ветрено') || item.includes('перегрева') || item.includes('давление')
+            );
+            
+            const finalRecommendations = uniq([...allRecommendations, ...importantExtras, ...importantNotes]);
+            
+            // Отображаем рекомендации
+            const clothingEl = document.getElementById('clothingRecommendation');
+            if (clothingEl) {
+                clothingEl.innerHTML = finalRecommendations.length ? 
+                    finalRecommendations.map(item => `• ${item}`).join('<br>') : 
+                    'Нет особых требований к одежде';
+            }
+        }
+
+        // === Последние запросы и хоткеи ===
+        function getRecent() {
+            try { return JSON.parse(localStorage.getItem('recentSearches') || '[]'); } catch { return []; }
+        }
+        function setRecent(list) {
+            localStorage.setItem('recentSearches', JSON.stringify(list));
+            renderRecentSearches();
+        }
+        function pushRecentSearch(data) {
+            const name = [data.location.name, data.location.region, data.location.country].filter(Boolean).join(', ');
+            const current = getRecent();
+            const next = [name, ...current.filter(c => c !== name)].slice(0,5);
+            setRecent(next);
+        }
+        function renderRecentSearches() {
+            const wrapper = document.getElementById('recentWrapper');
+            if (!wrapper || !recentContainer) return;
+            const items = getRecent();
+            recentContainer.innerHTML = '';
+            if (!items.length) { wrapper.style.display = 'none'; return; }
+            wrapper.style.display = 'block';
+            items.forEach((city, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'theme-toggle';
+                btn.style.position = 'static';
+                btn.style.boxShadow = 'none';
+                btn.innerHTML = `<i class=\"fas fa-clock\"></i> <span>${city}</span> <kbd style=\"margin-left:6px; font-size:0.8em;\">Alt+${idx+1}</kbd>`;
+                btn.addEventListener('click', () => {
+                    cityInput.value = city;
+                    getWeatherRecommendations();
+                });
+                recentContainer.appendChild(btn);
+            });
+        }
+        window.addEventListener('keydown', (e) => {
+            if (e.altKey) {
+                const num = parseInt(e.key, 10);
+                if (num >=1 && num <=5) {
+                    const items = getRecent();
+                    const city = items[num-1];
+                    if (city) {
+                        e.preventDefault();
+                        cityInput.value = city;
+                        getWeatherRecommendations();
+                    }
+                }
+            }
+        });
+
+        // (Риски удалены по требованию)
+
+        // === Полностью переделанный адаптивный график ===
+        let chartData = null;
+        let selectedPoint = -1;
+        let resizeTimeout = null;
+        
+        function renderHourlyChart(data) {
+            const canvas = document.getElementById('hourlyChart');
+            if (!canvas) return;
+            
+            const days = data.forecast?.forecastday || [];
+            const hours = [...(days[0]?.hour || []), ...(days[1]?.hour || [])];
+            
+            if (!hours.length) { 
+                const chartSection = document.getElementById('chartSection');
+                if (chartSection) chartSection.style.display = 'none';
+                return; 
+            }
+            
+            // Показываем секцию графика
+            const chartSection = document.getElementById('chartSection');
+            if (chartSection) chartSection.style.display = 'block';
+            
+            // Подготавливаем данные
+            const now = new Date(data.location.localtime.replace(' ', 'T'));
+            const startIdx = hours.findIndex(x => new Date(x.time.replace(' ', 'T')).getTime() >= now.getTime());
+            const start = startIdx >= 0 ? startIdx : 0;
+            const slice = hours.slice(start, start + 24);
+            
+            chartData = slice.map((h, i) => ({
+                x: i,
+                temp: Math.round(h.temp_c),
+                feelsLike: Math.round(h.feelslike_c || h.temp_c),
+                hour: new Date(h.time.replace(' ', 'T')).getHours(),
+                point: h,
+                time: h.time
+            }));
+            
+            if (!chartData.length) {
+                if (chartSection) chartSection.style.display = 'none';
+                return;
+            }
+            
+            // Обновляем информацию о диапазоне
+            updateChartInfo();
+            
+            // Рисуем график с задержкой для правильного размера
+            setTimeout(() => {
+                drawChart();
+                setupChartInteractions();
+            }, 50);
+        }
+        
+        function updateChartInfo() {
+            if (!chartData) return;
+            
+            const chartRange = document.getElementById('chartRange');
+            if (chartRange) {
+                const startHour = chartData[0].hour;
+                const endHour = chartData[chartData.length - 1].hour;
+                chartRange.textContent = `${String(startHour).padStart(2, '0')}:00 - ${String(endHour).padStart(2, '0')}:00`;
+            }
+        }
+        
+        function drawChart() {
+            const canvas = document.getElementById('hourlyChart');
+            if (!canvas || !chartData) return;
+            
+            const ctx = canvas.getContext('2d');
+            const container = canvas.parentElement;
+            
+            // Получаем размеры контейнера
+            const containerWidth = container.clientWidth;
+            const containerHeight = Math.min(300, Math.max(200, containerWidth * 0.4));
+            
+            // Устанавливаем размеры канваса
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = containerWidth * dpr;
+            canvas.height = containerHeight * dpr;
+            canvas.style.width = containerWidth + 'px';
+            canvas.style.height = containerHeight + 'px';
+            ctx.scale(dpr, dpr);
+            
+            // Очищаем канвас
+            ctx.clearRect(0, 0, containerWidth, containerHeight);
+            
+            // Адаптивные отступы
+            const isMobile = containerWidth < 600;
+            const padding = {
+                top: isMobile ? 15 : 20,
+                right: isMobile ? 15 : 25,
+                bottom: isMobile ? 35 : 45,
+                left: isMobile ? 40 : 55
+            };
+            
+            const chartWidth = containerWidth - padding.left - padding.right;
+            const chartHeight = containerHeight - padding.top - padding.bottom;
+            
+            // Находим диапазон температур
+            const allTemps = [...chartData.map(d => d.temp), ...chartData.map(d => d.feelsLike)];
+            const minTemp = Math.min(...allTemps);
+            const maxTemp = Math.max(...allTemps);
+            const tempRange = maxTemp - minTemp;
+            const tempPadding = Math.max(3, tempRange * 0.15);
+            
+            const yMin = minTemp - tempPadding;
+            const yMax = maxTemp + tempPadding;
+            
+            // Функции для преобразования координат
+            const xScale = (index) => padding.left + (index / (chartData.length - 1)) * chartWidth;
+            const yScale = (temp) => padding.top + chartHeight - ((temp - yMin) / (yMax - yMin)) * chartHeight;
+            
+            // Рисуем градиентный фон
+            const bgGradient = ctx.createLinearGradient(0, padding.top, 0, containerHeight - padding.bottom);
+            bgGradient.addColorStop(0, 'rgba(102, 126, 234, 0.05)');
+            bgGradient.addColorStop(0.5, 'rgba(255,255,255,0.02)');
+            bgGradient.addColorStop(1, 'rgba(243, 156, 18, 0.05)');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(padding.left, padding.top, chartWidth, chartHeight);
+            
+            // Рисуем современную сетку
+            ctx.strokeStyle = document.body.classList.contains('dark') ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+            ctx.lineWidth = 1;
+            
+            // Горизонтальные линии
+            const gridLines = 5;
+            for (let i = 0; i <= gridLines; i++) {
+                const y = padding.top + (i / gridLines) * chartHeight;
+            ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(containerWidth - padding.right, y);
+            ctx.stroke();
+            }
+            
+            // Вертикальные линии (каждые 6 часов)
+            const step = Math.max(1, Math.floor(chartData.length / 8));
+            for (let i = 0; i < chartData.length; i += step) {
+                const x = xScale(i);
+            ctx.beginPath();
+                ctx.moveTo(x, padding.top);
+                ctx.lineTo(x, containerHeight - padding.bottom);
+            ctx.stroke();
+            }
+            
+            // Рисуем градиентную область под линией температуры
+            const areaGradient = ctx.createLinearGradient(0, padding.top, 0, containerHeight - padding.bottom);
+            areaGradient.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
+            areaGradient.addColorStop(1, 'rgba(102, 126, 234, 0.05)');
+            
+            ctx.fillStyle = areaGradient;
+                ctx.beginPath();
+            ctx.moveTo(xScale(0), containerHeight - padding.bottom);
+            chartData.forEach((point, i) => {
+                const x = xScale(i);
+                const y = yScale(point.temp);
+                ctx.lineTo(x, y);
+            });
+            ctx.lineTo(xScale(chartData.length - 1), containerHeight - padding.bottom);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Рисуем линии температур с градиентами
+            // Линия "ощущается как" (пунктирная с градиентом)
+            const feelsLikeGradient = ctx.createLinearGradient(padding.left, 0, containerWidth - padding.right, 0);
+            feelsLikeGradient.addColorStop(0, '#f39c12');
+            feelsLikeGradient.addColorStop(0.5, '#e67e22');
+            feelsLikeGradient.addColorStop(1, '#d35400');
+            
+            ctx.strokeStyle = feelsLikeGradient;
+            ctx.lineWidth = isMobile ? 2.5 : 3.5;
+            ctx.setLineDash([10, 5]);
+            ctx.lineCap = 'round';
+                    ctx.beginPath();
+            chartData.forEach((point, i) => {
+                const x = xScale(i);
+                const y = yScale(point.feelsLike);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+                    ctx.stroke();
+            
+            // Линия температуры (сплошная с градиентом)
+            const tempGradient = ctx.createLinearGradient(padding.left, 0, containerWidth - padding.right, 0);
+            tempGradient.addColorStop(0, '#667eea');
+            tempGradient.addColorStop(0.5, '#764ba2');
+            tempGradient.addColorStop(1, '#f093fb');
+            
+            ctx.strokeStyle = tempGradient;
+            ctx.lineWidth = isMobile ? 3.5 : 4.5;
+            ctx.setLineDash([]);
+            ctx.lineCap = 'round';
+            ctx.shadowColor = 'rgba(102, 126, 234, 0.3)';
+            ctx.shadowBlur = 8;
+                    ctx.beginPath();
+            chartData.forEach((point, i) => {
+                const x = xScale(i);
+                const y = yScale(point.temp);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+                    });
+                    ctx.stroke();
+            ctx.shadowBlur = 0;
+            
+            // Рисуем современные точки с эффектами
+            chartData.forEach((point, i) => {
+                const x = xScale(i);
+                const y = yScale(point.temp);
+                const feelsY = yScale(point.feelsLike);
+                
+                // Основная точка с градиентом и свечением
+                const pointGradient = ctx.createRadialGradient(x, y, 0, x, y, (isMobile ? 8 : 10));
+                if (i === selectedPoint) {
+                    pointGradient.addColorStop(0, '#ff6b6b');
+                    pointGradient.addColorStop(0.7, '#ff5252');
+                    pointGradient.addColorStop(1, 'rgba(255, 107, 107, 0)');
+                } else {
+                    pointGradient.addColorStop(0, '#667eea');
+                    pointGradient.addColorStop(0.7, '#764ba2');
+                    pointGradient.addColorStop(1, 'rgba(102, 126, 234, 0)');
+                }
+                
+                ctx.fillStyle = pointGradient;
+                        ctx.beginPath();
+                ctx.arc(x, y, i === selectedPoint ? (isMobile ? 6 : 8) : (isMobile ? 4 : 5), 0, Math.PI * 2);
+                        ctx.fill();
+                
+                // Внутренняя точка
+                ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                ctx.arc(x, y, i === selectedPoint ? (isMobile ? 3 : 4) : (isMobile ? 2 : 2.5), 0, Math.PI * 2);
+                    ctx.fill();
+                
+                // Точка "ощущается как" с эффектом
+                const feelsGradient = ctx.createRadialGradient(x, feelsY, 0, x, feelsY, (isMobile ? 5 : 6));
+                feelsGradient.addColorStop(0, i === selectedPoint ? '#ff6b6b' : '#f39c12');
+                feelsGradient.addColorStop(0.7, i === selectedPoint ? '#ff5252' : '#e67e22');
+                feelsGradient.addColorStop(1, 'rgba(243, 156, 18, 0)');
+                
+                ctx.fillStyle = feelsGradient;
+                ctx.beginPath();
+                ctx.arc(x, feelsY, isMobile ? 3 : 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Внутренняя точка "ощущается как"
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(x, feelsY, isMobile ? 1.5 : 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Современные подписи осей с эффектами
+            ctx.fillStyle = document.body.classList.contains('dark') ? '#bbb' : '#555';
+            ctx.font = `bold ${isMobile ? '10' : '12'}px Segoe UI, Arial`;
+            ctx.textAlign = 'center';
+            
+            // Подписи времени с фоном
+            chartData.forEach((point, i) => {
+                if (i % step === 0) {
+                    const x = xScale(i);
+                    const text = String(point.hour).padStart(2, '0');
+                    
+                    // Фон для подписи
+                    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                    ctx.fillRect(x - 12, containerHeight - (isMobile ? 20 : 25), 24, (isMobile ? 12 : 16));
+                    
+                    // Текст
+                    ctx.fillStyle = document.body.classList.contains('dark') ? '#ddd' : '#444';
+                    ctx.fillText(text, x, containerHeight - (isMobile ? 12 : 16));
+                }
+            });
+            
+            // Подписи температуры с фоном
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= gridLines; i++) {
+                const temp = yMin + ((yMax - yMin) / gridLines) * i;
+                const y = padding.top + (i / gridLines) * chartHeight;
+                const text = Math.round(temp) + '°';
+                
+                // Фон для подписи
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                ctx.fillRect(padding.left - (isMobile ? 25 : 35), y - 6, (isMobile ? 20 : 30), (isMobile ? 10 : 12));
+                
+                // Текст
+                ctx.fillStyle = document.body.classList.contains('dark') ? '#ddd' : '#444';
+                ctx.fillText(text, padding.left - (isMobile ? 8 : 12), y + 4);
+            }
+            
+            // Стильные подписи осей
+            ctx.textAlign = 'center';
+            ctx.font = `bold ${isMobile ? '10' : '11'}px Segoe UI, Arial`;
+            
+            // Фон для подписи X-оси
+            const xAxisText = 'Время (часы)';
+            const xAxisWidth = ctx.measureText(xAxisText).width + 20;
+            ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            ctx.fillRect(containerWidth / 2 - xAxisWidth / 2, containerHeight - (isMobile ? 20 : 25), xAxisWidth, (isMobile ? 12 : 16));
+            
+            ctx.fillStyle = document.body.classList.contains('dark') ? '#ddd' : '#444';
+            ctx.fillText(xAxisText, containerWidth / 2, containerHeight - (isMobile ? 8 : 12));
+            
+            // Стильная подпись Y-оси
+            ctx.save();
+            ctx.translate(isMobile ? 12 : 18, containerHeight / 2);
+            ctx.rotate(-Math.PI / 2);
+            
+            const yAxisText = 'Температура (°C)';
+            const yAxisWidth = ctx.measureText(yAxisText).width + 20;
+            ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            ctx.fillRect(-yAxisWidth / 2, -8, yAxisWidth, 16);
+            
+            ctx.fillStyle = document.body.classList.contains('dark') ? '#ddd' : '#444';
+            ctx.fillText(yAxisText, 0, 4);
+            ctx.restore();
+        }
+        
+        function setupChartInteractions() {
+            const canvas = document.getElementById('hourlyChart');
+            const tooltip = document.getElementById('chartTooltip');
+            if (!canvas || !tooltip || !chartData) return;
+            
+            // Обработчик движения мыши
+            canvas.onmousemove = (ev) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = ev.clientX - rect.left;
+                const y = ev.clientY - rect.top;
+                
+                // Находим ближайшую точку
+                const containerWidth = canvas.parentElement.clientWidth;
+                const isMobile = containerWidth < 600;
+                const padding = { left: isMobile ? 40 : 55, right: isMobile ? 15 : 25 };
+                const chartWidth = containerWidth - padding.left - padding.right;
+                const pointIndex = Math.round(((x - padding.left) / chartWidth) * (chartData.length - 1));
+                
+                if (pointIndex >= 0 && pointIndex < chartData.length) {
+                    const point = chartData[pointIndex];
+                    tooltip.style.left = ev.clientX + 'px';
+                    tooltip.style.top = ev.clientY + 'px';
+                    tooltip.innerHTML = `
+                        <strong>${String(point.hour).padStart(2, '0')}:00</strong><br>
+                        Температура: ${point.temp}°C<br>
+                        Ощущается: ${point.feelsLike}°C
+                    `;
+                    tooltip.style.opacity = '1';
+                }
+            };
+            
+            canvas.onmouseleave = () => {
+                tooltip.style.opacity = '0';
+            };
+            
+            // Обработчик клика
+            canvas.onclick = (ev) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = ev.clientX - rect.left;
+                
+                const containerWidth = canvas.parentElement.clientWidth;
+                const isMobile = containerWidth < 600;
+                const padding = { left: isMobile ? 40 : 55, right: isMobile ? 15 : 25 };
+                const chartWidth = containerWidth - padding.left - padding.right;
+                const pointIndex = Math.round(((x - padding.left) / chartWidth) * (chartData.length - 1));
+                
+                if (pointIndex >= 0 && pointIndex < chartData.length) {
+                    selectedPoint = selectedPoint === pointIndex ? -1 : pointIndex;
+                    const point = chartData[pointIndex];
+                    
+                    if (selectedPoint !== -1) {
+                        generateRecommendationsForHour(point.point);
+                    } else {
+                        // Возвращаем общие рекомендации
+                        if (lastWeatherData) {
+                            generateRecommendations(lastWeatherData);
+                            const recTitle = document.querySelector('#recommendations .section-title');
+                            if (recTitle) {
+                                recTitle.innerHTML = '<i class="fas fa-tshirt"></i> Что одеть';
+                            }
+                        }
+                    }
+                    
+                    drawChart(); // Перерисовываем с выделением
+                }
+            };
+        }
+        
+        // Обработчик изменения размера окна с дебаунсом
+        window.addEventListener('resize', () => {
+            if (resizeTimeout) clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (chartData) {
+                    drawChart();
+                }
+            }, 150);
+        });
+
+        function generateRecommendationsForHour(hourPoint) {
+            // Собираем минимальные данные в формат, похожий на current
+            const dataLike = {
+                current: {
+                    temp_c: hourPoint.temp_c,
+                    feelslike_c: hourPoint.feelslike_c ?? hourPoint.temp_c,
+                    wind_kph: hourPoint.wind_kph,
+                    humidity: hourPoint.humidity,
+                    pressure_mb: hourPoint.pressure_mb ?? 1013,
+                    uv: hourPoint.uv ?? 0,
+                    condition: hourPoint.condition || { text: '' }
+                }
+            };
+            // пометка времени
+            const recTitle = document.querySelector('#recommendations .section-title');
+            if (recTitle) {
+                const dt = new Date(hourPoint.time.replace(' ', 'T'));
+                const hh = String(dt.getHours()).padStart(2,'0');
+                recTitle.innerHTML = '<i class="fas fa-tshirt"></i> Что одеть — ' + hh + ':00';
+            }
+            generateRecommendations(dataLike);
+        }
+        
+        function changeBackground(temp) {
+            const body = document.body;
+            // Удаляем только классы температуры, сохраняя тему
+            body.classList.remove('cold','cool','mild','warm','hot');
+            
+            if (temp < -10) {
+                body.classList.add('cold');
+            } else if (temp < 5) {
+                body.classList.add('cool');
+            } else if (temp < 20) {
+                body.classList.add('mild');
+            } else if (temp < 30) {
+                body.classList.add('warm');
+            } else {
+                body.classList.add('hot');
+            }
+        }
+        
+        function showLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+            getRecommendationsBtn.disabled = show;
+            if (show) {
+                results.style.display = 'none';
+            }
+        }
+        
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            
+            // Удаляем предыдущие ошибки
+            const existingError = document.querySelector('.error');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            const container = document.querySelector('.container');
+            if (container) {
+                container.appendChild(errorDiv);
+            }
+            
+            // Автоматически удаляем ошибку через 6 секунд
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 6000);
+        }
+
+        // Инициализация состояния кнопки
+        if (cityInput && !cityInput.value.trim()) {
+            getRecommendationsBtn.disabled = true;
+        }
+        
+        // Инициализация скрытия секции графика
+        const chartSection = document.getElementById('chartSection');
+        if (chartSection) {
+            chartSection.style.display = 'none';
+        }
+        // конец инициализации
+
+    </script>
+</body>
+</html>
