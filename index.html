@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#FCD34D">
+    <title>Subbs - Зарабатывай Звёзды</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
+        body {
+            background-color: #FFFEF9;
+            margin: 0;
+            padding: 0;
+            padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+        
+        /* Safe area for notched devices */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(12px, env(safe-area-inset-left));
+                padding-right: max(12px, env(safe-area-inset-right));
+            }
+        }
+        
+        .card {
+            background: #FFFFFF;
+            border: 3px solid #000000;
+            border-radius: 20px;
+            box-shadow: 4px 4px 0px #000000;
+        }
+        
+        .btn-primary {
+            background: #FCD34D;
+            color: #000000;
+            border: 3px solid #000000;
+            border-radius: 16px;
+            box-shadow: 4px 4px 0px #000000;
+            font-weight: 700;
+            transition: all 0.1s ease;
+            touch-action: manipulation;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .btn-primary:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000000;
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #FFFFFF;
+            color: #000000;
+            border: 3px solid #000000;
+            border-radius: 16px;
+            box-shadow: 4px 4px 0px #000000;
+            font-weight: 600;
+            transition: all 0.1s ease;
+            touch-action: manipulation;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .btn-secondary:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000000;
+        }
+        
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 375px) {
+            .btn-primary, .btn-secondary {
+                font-size: 14px;
+                padding: 12px 16px;
+            }
+        }
+        
+        .input-field {
+            background: #FFFFFF;
+            border: 3px solid #000000;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 16px;
+            transition: all 0.1s ease;
+            width: 100%;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            box-shadow: 4px 4px 0px #000000;
+        }
+        
+        @media (max-width: 375px) {
+            .input-field {
+                font-size: 14px;
+                padding: 10px 14px;
+            }
+        }
+        
+        .screen {
+            display: none;
+            padding: 16px;
+            padding-bottom: 100px;
+            min-height: calc(100vh - 80px);
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        @media (min-width: 640px) {
+            .screen {
+                padding: 20px;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .star-badge {
+            background: #FCD34D;
+            color: #000000;
+            border: 3px solid #000000;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 800;
+            box-shadow: 3px 3px 0px #000000;
+        }
+        
+        .task-card {
+            background: #FFFFFF;
+            border: 3px solid #000000;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 4px 4px 0px #000000;
+            transition: all 0.1s ease;
+        }
+        
+        .task-card.completed {
+            opacity: 0.6;
+        }
+        
+        .task-card:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000000;
+        }
+        
+        .gift-card {
+            background: #FFFFFF;
+            border: 3px solid #000000;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 4px 4px 0px #000000;
+            transition: all 0.1s ease;
+        }
+        
+        .gift-card:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000000;
+        }
+        
+        .gift-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #FFFFFF;
+            border-top: 3px solid #000000;
+            padding: 8px 12px;
+            padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0px -4px 0px #000000;
+            z-index: 1000;
+        }
+        
+        @media (min-width: 640px) {
+            .nav-bar {
+                max-width: 600px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            transition: all 0.1s ease;
+            cursor: pointer;
+            min-width: 60px;
+            touch-action: manipulation;
+        }
+        
+        .nav-item.active {
+            background: #FCD34D;
+        }
+        
+        .nav-item:active {
+            transform: translate(1px, 1px);
+        }
+        
+        @media (max-width: 375px) {
+            .nav-item {
+                padding: 6px 8px;
+                min-width: 50px;
+            }
+            
+            .nav-item span:first-child {
+                font-size: 20px;
+            }
+            
+            .nav-item span:last-child {
+                font-size: 10px;
+            }
+        }
+        
+        .progress-bar {
+            background: #FFFFFF;
+            border: 3px solid #000000;
+            border-radius: 20px;
+            height: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            background: #FCD34D;
+            height: 100%;
+            border-radius: 16px;
+            transition: width 0.3s ease;
+        }
+        
+        .channel-card {
+            background: #FFFFFF;
+            border: 3px solid #000000;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 3px 3px 0px #000000;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 12px;
+            border: 2px solid #000000;
+        }
+        
+        .status-badge.pending {
+            background: #FFFEF9;
+            color: #000000;
+        }
+        
+        .status-badge.completed {
+            background: #FCD34D;
+            color: #000000;
+        }
+        
+        .status-badge.failed {
+            background: #FF6B6B;
+            color: #000000;
+        }
+        
+        h1, h2, h3 {
+            text-transform: lowercase;
+            font-weight: 800;
+        }
+        
+        .emoji-large {
+            font-size: 48px;
+        }
+        
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Prevent text selection on buttons */
+        button, .nav-item {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Better touch targets */
+        @media (max-width: 640px) {
+            button, .nav-item, .task-card {
+                min-height: 44px; /* iOS recommended touch target */
+            }
+        }
+        
+        /* Fix for iOS Safari viewport */
+        @supports (-webkit-touch-callout: none) {
+            .screen {
+                min-height: -webkit-fill-available;
+            }
+        }
+        
+        /* Hide scrollbar but keep functionality */
+        .screen::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+        
+        /* Better focus states for accessibility */
+        button:focus-visible,
+        .nav-item:focus-visible,
+        .input-field:focus-visible {
+            outline: 3px solid #FCD34D;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header with Stars Balance -->
+    <div class="bg-white border-b-4 border-black p-3 sm:p-4 sticky top-0 z-50 shadow-[4px_4px_0px_#000]">
+        <div class="flex items-center justify-between">
+            <h1 class="text-xl sm:text-2xl font-black lowercase">subbs</h1>
+            <div class="star-badge flex items-center gap-2">
+                <span class="text-lg sm:text-xl">⭐</span>
+                <span id="starsBalance" class="text-sm sm:text-base">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Screen -->
+    <div id="mainScreen" class="screen active">
+        <div class="mt-6">
+            <h2 class="text-3xl font-black lowercase mb-4">добро пожаловать!</h2>
+            <p class="text-lg mb-6">выполняй задания, получай звёзды и обменивай их на подарки</p>
+            
+            <div class="card p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-black lowercase">твой баланс</h3>
+                    <span class="text-3xl">⭐</span>
+                </div>
+                <div class="text-4xl font-black mb-2" id="mainBalance">0</div>
+                <div class="text-sm opacity-70">звёзд доступно</div>
+            </div>
+            
+            <div class="card p-6 mb-6">
+                <h3 class="text-xl font-black lowercase mb-4">быстрые действия</h3>
+                <div class="space-y-3">
+                    <button onclick="showScreen('tasksScreen')" class="btn-primary w-full py-4 text-lg">
+                        📋 выполнить задания
+                    </button>
+                    <button onclick="showScreen('giftsScreen')" class="btn-primary w-full py-4 text-lg">
+                        🎁 магазин подарков
+                    </button>
+                    <button onclick="showScreen('promoScreen')" class="btn-secondary w-full py-4 text-lg">
+                        📢 заказать пиар
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card p-6">
+                <h3 class="text-xl font-black lowercase mb-4">статистика</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span>выполнено заданий:</span>
+                        <span class="font-bold" id="completedTasks">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>получено подарков:</span>
+                        <span class="font-bold" id="receivedGifts">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>активных подписок:</span>
+                        <span class="font-bold" id="activeSubscriptions">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>на проверке:</span>
+                        <span class="font-bold" id="pendingSubscriptions">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tasks Screen -->
+    <div id="tasksScreen" class="screen">
+        <div class="mt-4">
+            <h2 class="text-3xl font-black lowercase mb-2">задания</h2>
+            <p class="text-sm opacity-70 mb-6">подпишись на каналы и получи подарок</p>
+            
+            <div class="card p-4 mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-bold">прогресс задания</span>
+                    <span id="taskProgress">0/6</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div id="tasksList" class="mb-20">
+                <!-- Tasks will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Gifts Screen -->
+    <div id="giftsScreen" class="screen">
+        <div class="mt-4">
+            <h2 class="text-3xl font-black lowercase mb-2">магазин подарков</h2>
+            <p class="text-sm opacity-70 mb-6">обменяй звёзды на подарки</p>
+            
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-20" id="giftsList">
+                <!-- Gifts will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Promo Screen -->
+    <div id="promoScreen" class="screen">
+        <div class="mt-4">
+            <h2 class="text-3xl font-black lowercase mb-2">заказать пиар</h2>
+            <p class="text-sm opacity-70 mb-6">продвигай свой канал за звёзды</p>
+            
+            <div class="card p-6 mb-6">
+                <h3 class="text-xl font-black lowercase mb-4">стоимость</h3>
+                <div class="space-y-2 mb-6">
+                    <div class="flex justify-between items-center">
+                        <span>за 1 подписчика:</span>
+                        <span class="font-bold">4-5 ⭐</span>
+                    </div>
+                    <div class="text-sm opacity-70">
+                        минимальный заказ: 10 подписчиков
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card p-6 mb-6">
+                <h3 class="text-xl font-black lowercase mb-4">форма заказа</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block mb-2 font-bold">ссылка на канал</label>
+                        <input type="text" id="channelLink" class="input-field w-full" placeholder="https://t.me/yourchannel">
+                    </div>
+                    <div>
+                        <label class="block mb-2 font-bold">количество подписчиков</label>
+                        <input type="number" id="subscribersCount" class="input-field w-full" placeholder="10" min="10">
+                    </div>
+                    <div class="card p-4 bg-[#FFFEF9]">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold">к оплате:</span>
+                            <span class="text-2xl font-black" id="totalCost">0 ⭐</span>
+                        </div>
+                    </div>
+                    <button onclick="submitPromoOrder()" class="btn-primary w-full py-4 text-lg">
+                        заказать пиар
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card p-6">
+                <h3 class="text-xl font-black lowercase mb-4">мои заказы</h3>
+                <div id="myOrders" class="space-y-3">
+                    <!-- Orders will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Screen -->
+    <div id="profileScreen" class="screen">
+        <div class="mt-4">
+            <h2 class="text-3xl font-black lowercase mb-6">профиль</h2>
+            
+            <div class="card p-6 mb-6">
+                <div class="text-center mb-4">
+                    <div class="emoji-large mb-2" id="userAvatar">👤</div>
+                    <h3 class="text-xl font-black lowercase" id="userName">пользователь</h3>
+                    <div class="text-sm opacity-70" id="userId"></div>
+                </div>
+            </div>
+            
+            <div class="card p-6 mb-6">
+                <h3 class="text-xl font-black lowercase mb-4">настройки</h3>
+                <div class="space-y-3">
+                    <button class="btn-secondary w-full py-3 text-left">
+                        🔔 уведомления
+                    </button>
+                    <button class="btn-secondary w-full py-3 text-left">
+                        📊 история операций
+                    </button>
+                    <button class="btn-secondary w-full py-3 text-left">
+                        ❓ помощь
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card p-6">
+                <h3 class="text-xl font-black lowercase mb-4">о приложении</h3>
+                <p class="text-sm opacity-70 mb-4">
+                    subbs - платформа для заработка telegram stars через выполнение заданий и подписки на каналы.
+                </p>
+                <p class="text-xs opacity-50">
+                    версия 1.0.0
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="showScreen('mainScreen')">
+            <span class="text-2xl">🏠</span>
+            <span class="text-xs font-bold">главная</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('tasksScreen')">
+            <span class="text-2xl">📋</span>
+            <span class="text-xs font-bold">задания</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('giftsScreen')">
+            <span class="text-2xl">🎁</span>
+            <span class="text-xs font-bold">подарки</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('profileScreen')">
+            <span class="text-2xl">👤</span>
+            <span class="text-xs font-bold">профиль</span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
