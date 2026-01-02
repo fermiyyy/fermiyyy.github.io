@@ -50,7 +50,7 @@ const state = {
     // Channels for subscription tasks
     // ВАЖНО: Замените на реальные каналы перед использованием
     channels: [
-        { id: 1, name: 'Tech News', username: '@technews', link: 'https://t.me/technews' },
+        { id: 1, name: 'Fermiy', username: '@fermiyxz', link: 'https://t.me/fermiyxz' },
         { id: 2, name: 'Crypto Updates', username: '@cryptoupdates', link: 'https://t.me/cryptoupdates' },
         { id: 3, name: 'Gaming Hub', username: '@gaminghub', link: 'https://t.me/gaminghub' },
         { id: 4, name: 'Design Daily', username: '@designdaily', link: 'https://t.me/designdaily' },
@@ -934,3 +934,4 @@ window.subscribeToChannel = subscribeToChannel;
 window.claimGift = claimGift;
 window.purchaseGift = purchaseGift;
 window.submitPromoOrder = submitPromoOrder;
+
